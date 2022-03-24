@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: coin-profit
+  data:
+    mongodb:
+      uri: mongodb://root:example@localhost/coin-profit?authSource=admin
+      auto-index-creation: true
+
+telegram:
+  bot:
+    name: ${BOT_NAME}
+    token: ${BOT_TOKEN}
