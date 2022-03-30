@@ -5,6 +5,7 @@ import com.example.coinprofit.document.CoinDepositDocument;
 import com.example.coinprofit.dto.CoinProfitDto;
 import com.example.coinprofit.dto.ProfitDto;
 import com.example.coinprofit.mapper.CoinDepositMapper;
+import com.example.coinprofit.model.Coin;
 import com.example.coinprofit.service.CoinDepositService;
 import com.example.coinprofit.service.CoinValueReader;
 import lombok.RequiredArgsConstructor;
@@ -64,12 +65,21 @@ public class DatabaseCoinDepositService implements CoinDepositService {
                 .stream()
                 .mapToDouble(detail -> detail.getBuyPrice() * detail.getCount())
                 .sum();
+
         StringBuilder builder = new StringBuilder();
         builder.append(String.format("Total profit: %1$,.2f USD\nTotal Invested: %2$,.2f USD\n\nDetails:\n", profitDto.getAmount(), totalInvestSum));
         for (CoinProfitDto detail : profitDto.getDetails()) {
-            builder.append(String.format("%s (%2$,.2f) profit: %3$,.2f USD\n", detail.getCoin().toUpperCase(), detail.getBuyPrice() * detail.getCount(), detail.getProfit()));
+            double buyPrice = detail.getBuyPrice() * detail.getCount();
+            Double change = (detail.getCurrentPrice() / detail.getBuyPrice() - 1.0) * 100;
+            builder.append(Coin.getCoinName(detail.getCoin().toUpperCase()))
+                    .append(String.format(" (%1$,.2f) ", buyPrice));
+            if (detail.getProfit() >= 0) {
+                builder.append("+");
+            }
+            builder.append(String.format("%1$,.2f USD (%2$,.2f", detail.getProfit(), change))
+                    .append("%)\n");
         }
-        builder.append("\n\n");
+        builder.append("\n");
         for (Map.Entry<String, Double> pair : coinsPrice.entrySet()) {
             if (pair.getValue().isNaN()) {
                 builder.append("Not found price for ").append(pair.getKey()).append(". Please check correct coin name.");
